@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Layouts - Fluxo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="font-['Roboto'] min-h-screen bg-gray-50">
+    <header class="bg-blue-500 text-white py-3 shadow-md">
+        <h1 class="text-2xl font-bold text-center select-none mb-2">Layouts Salvos</h1>
+        <div class="flex justify-center">
+            <button onclick="window.location.href='index.html'" class="px-6 py-1.5 bg-white text-blue-600 rounded-md hover:bg-gray-100 transition-colors text-sm font-medium shadow-sm">Voltar</button>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div id="layouts-list" class="space-y-4">
+            <!-- Layouts will be dynamically inserted here -->
+        </div>
+    </main>
+
+    <script src="test-data.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const layoutsList = document.getElementById('layouts-list');
+            const layouts = JSON.parse(localStorage.getItem('layouts') || '[]');
+
+            if (layouts.length === 0) {
+                layoutsList.innerHTML = '<p class="text-center text-gray-500">Nenhum layout salvo.</p>';
+                return;
+            }
+
+            layouts.forEach((layout, index) => {
+                const item = document.createElement('div');
+                item.className = 'bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center justify-between';
+                
+                const content = document.createElement('div');
+                content.className = 'grid grid-cols-1 md:grid-cols-3 gap-4 flex-1';
+                
+                // Object Name Column
+                const titleContainer = document.createElement('div');
+                titleContainer.className = 'flex items-center';
+                
+                const title = document.createElement('h2');
+                title.className = 'text-lg font-medium text-gray-800 cursor-pointer hover:text-blue-500';
+                title.textContent = layout.object;
+                title.onclick = () => {
+                    try {
+                        sessionStorage.setItem('selectedLayout', JSON.stringify(layout));
+                        window.location.href = 'index.html';
+                    } catch (error) {
+                        console.error('Error storing layout:', error);
+                        alert('Erro ao carregar o layout.');
+                    }
+                };
+                titleContainer.appendChild(title);
+
+                // Description Column
+                const descriptionContainer = document.createElement('div');
+                descriptionContainer.className = 'flex items-center';
+                
+                const description = document.createElement('p');
+                description.className = 'text-gray-600';
+                description.textContent = layout.description || 'Sem descrição';
+                descriptionContainer.appendChild(description);
+
+                // Author Column
+                const authorContainer = document.createElement('div');
+                authorContainer.className = 'flex items-center';
+                
+                const author = document.createElement('p');
+                author.className = 'text-gray-600';
+                author.textContent = layout.author || 'Autor não informado';
+                authorContainer.appendChild(author);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm';
+                deleteBtn.textContent = 'Deletar';
+                deleteBtn.onclick = () => {
+                    if (confirm('Tem certeza que deseja deletar este layout?')) {
+                        layouts.splice(index, 1);
+                        localStorage.setItem('layouts', JSON.stringify(layouts));
+                        item.remove();
+                        
+                        if (layouts.length === 0) {
+                            layoutsList.innerHTML = '<p class="text-center text-gray-500">Nenhum layout salvo.</p>';
+                        }
+                    }
+                };
+
+                content.append(titleContainer, descriptionContainer, authorContainer);
+                item.append(content, deleteBtn);
+                layoutsList.appendChild(item);
+            });
+        });
+    </script>
+</body>
+</html>
